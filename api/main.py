@@ -1,5 +1,4 @@
 from typing import Union
-import openai
 from openai import OpenAI
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from typing import Union, List
@@ -9,14 +8,16 @@ import hashlib
 from datetime import datetime, timezone
 
 app = FastAPI()
+openai_client = OpenAI()
+
+# Directory to save uploaded files
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
 
 @app.get("/channel/{channel_id}/summarize")
 def summarize_channel(channel_id: int):
@@ -47,17 +48,14 @@ def summarize_text(messages, model="gpt-4", max_tokens=150):
         messages_processed.append({"role": "user", "content": m})
 
     print(messages_processed)
-    client = OpenAI()
 
-    response = client.chat.completions.create(
+    response = openai_client.chat.completions.create(
         model=model,
         messages=messages_processed
     )
 
     return response.choices[0].message.content
-# Directory to save uploaded files
-UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+
 
 @app.post("/channel/{id}")
 async def upload_audio(id: int, files: List[UploadFile] = File(...)):
@@ -70,23 +68,52 @@ async def upload_audio(id: int, files: List[UploadFile] = File(...)):
             raise HTTPException(status_code=400, detail=f'Invalid file type. Only {valid_file_extensions_str} files are allowed.')
         
         # Create a unique hash for the file
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
         file_hash = hashlib.md5(file.file.read()).hexdigest()
         file.file.seek(0)  # Reset file pointer after reading
 
         # Create a new filename using the hash
-        file_extension = os.path.splitext(file.filename)[1]
-        new_filename = f"{file_hash}{file_extension}"
-        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+        audio_file_extension = os.path.splitext(file.filename)[1]
+        audio_filename = f"{file_hash}{audio_file_extension}"
 
-        file_dir = f"{UPLOAD_DIR}/{id}/{timestamp}/{file_hash}/audio"
+        audio_file_dir = f"{UPLOAD_DIR}/{id}/{timestamp}/{file_hash}/audio"
         # Create the directory if it doesn't exist
-        os.makedirs(file_dir, exist_ok=True)
+        os.makedirs(audio_file_dir, exist_ok=True)
 
-        file_location = f"{file_dir}/{new_filename}"
+        audio_file_location = f"{audio_file_dir}/{audio_filename}"
 
-        with open(file_location, "wb") as buffer:
+        with open(audio_file_location, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
-        
-        uploaded_files.append(file_location)
-    
-    return {"filenames": uploaded_files}
+
+        audio_filename = f"{file_hash}.txt"
+
+        # Create the transcription file path
+        transcription_dir = f"{UPLOAD_DIR}/{id}/{timestamp}/{file_hash}/transcription"
+        os.makedirs(transcription_dir, exist_ok=True)
+
+        transcription_file_location = f"{transcription_dir}/{audio_filename}"
+
+        # Transcribe the audio file and save the transcription to the text file
+        transcription = transcribe_audio(audio_file_location)
+        if transcription is not None:
+            with open(transcription_file_location, "w") as f:
+                f.write(transcription)
+
+    return {"audio_file_key": audio_file_location, "transcription_file_key": transcription_file_location}
+
+
+
+def transcribe_audio(file_path: str) -> Union[str, None]:
+    """
+    Transcribes an audio file using OpenAI's Whisper model.
+
+    :param file_path: Path to the audio file.
+    :return: The transcription of the audio file or None if there's an error.
+    """
+    try:
+        with open(file_path, "rb") as audio_file:
+            transcription = openai_client.audio.transcriptions.create(model="whisper-1", file=audio_file, response_format="text")
+        return transcription
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
