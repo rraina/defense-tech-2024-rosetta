@@ -1,8 +1,7 @@
 from typing import Union
-
-from fastapi import FastAPI
 import openai
 from openai import OpenAI
+from fastapi import FastAPI
 
 app = FastAPI()
 
