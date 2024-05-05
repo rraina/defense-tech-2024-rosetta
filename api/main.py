@@ -31,7 +31,11 @@ def read_root():
 
 
 @app.get("/channel/{channel_id}/summarize")
-def summarize_channel(channel_id: int):
+def summarize_channel(channel_id: int, is_testing: bool = False):
+    # Return hard coded data if testing
+    if is_testing:
+        return {"summary": "Gator 6 communicated with Viper to request a Hellfire attack on a building they're taking fire from. Viper confirmed this was possible and requested clarification if the attack was needed immediately, saying they could have a Hellfire on the building in about a minute. White 4 responded affirmatively to Viper’s request, but suggested directing the attack more towards the top of the building, where the fire is coming from. A moment would be needed to move their personnel back about 50 meters."}
+
 
     # Retrieve all of the messages for the given channel id
     messages = get_transcriptions_for_channel(channel_id)
@@ -39,10 +43,8 @@ def summarize_channel(channel_id: int):
 
     # Pass them to ChatGPT to get a summary
     summary = summarize_text(sorted_messages)
-
-    # Return the summary to the caller
+    
     return {"summary": summary}
-    # Test commit again again
 
 
 
@@ -74,7 +76,12 @@ def summarize_text(messages, model="gpt-4", max_tokens=150):
 
 
 @app.post("/channel/{channel_id}")
-async def upload_audio(channel_id: int, files: List[UploadFile] = File(...)):
+async def upload_audio(channel_id: int, files: List[UploadFile] = File(...), is_testing: bool = False):
+    if is_testing:
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+        file_hash = hashlib.md5("123".encode()).hexdigest()
+        return {"audio_file_key": f"{UPLOAD_DIR}/{channel_id}/{timestamp}/{file_hash}/audio/123.mp4", "transcription_file_key": f"{UPLOAD_DIR}/{channel_id}/{timestamp}/{file_hash}/audio/123.mp4"}
+    
     uploaded_files = []
     for file in files:
         valid_file_extenstions = ['mp3', 'mp4', 'mpeg', 'mpga', 'm4a', 'wav', 'webm']
