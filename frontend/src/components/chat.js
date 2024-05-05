@@ -183,13 +183,13 @@ export default function Chat({ title }) {
   return (
     <div className="container mx-auto h-full w-full">
       <div className="h-full flex flex-col justify-between">
-        <div className="h-1/6 flex items-center justify-center text-black text-4xl">
+        <div className="h-1/6 flex items-center justify-center text-white text-4xl">
           <h1>{title}</h1>
         </div>
-        <div className="overflow-y-auto h-4/6 p-4 bg-slate-300 rounded-md">
+        <div className="overflow-y-auto h-4/6 p-4 bg-custom-gray rounded-md">
           {messages.map((message, index) => (
             message.type === "summary"? (
-              <div key={index} className="mb-2 p-4 bg-green-700 text-black rounded-md">
+              <div key={index} className="mb-2 p-4 bg-green-700 text-white rounded-md">
                 Important: {message.body}
               </div>
             ) : (
@@ -199,7 +199,7 @@ export default function Chat({ title }) {
             )
           ))}
         </div>
-        <form className="flex mt-2 p-4 h-1/6 bg-slate-300 rounded-md" onSubmit={sendMessage}>
+        <form className="flex mt-2 p-4 h-1/6 bg-custom-gray rounded-md" onSubmit={sendMessage}>
           <div className='flex items-center justify-between h-full w-full'>
           {/* <input
             type="text"
@@ -220,21 +220,21 @@ export default function Chat({ title }) {
             <button
               type="submit"
               onClick={handleAskClick}
-              className="bg-blue-400 hover:bg-blue-900 text-black py-2 rounded w-full mr-2"
+              className="bg-custom-gray-light hover:bg-gray-500 text-black py-2 rounded w-full mr-2"
             >
               Ask
             </button>
             <button
               type="submit"
               onClick={handleSummaryMultConvClick}
-              className="bg-blue-400 hover:bg-blue-900 text-black py-2 rounded w-full mr-2"
+              className="bg-custom-gray-light hover:bg-gray-500 text-black py-2 rounded w-full mr-2"
             >
               Summarize multichannel
             </button>
             <button
               type="submit"
               onClick={handleSummaryOperClick}
-              className="bg-blue-400 hover:bg-blue-900 text-black py-2 rounded w-full mr-2"
+              className="bg-custom-gray-light hover:bg-gray-500 text-black py-2 rounded w-full mr-2"
             >
               Summarize operator
             </button>
@@ -249,14 +249,14 @@ export default function Chat({ title }) {
           <button
             type="submit"
             onClick={handleSummaryClick}
-            className="bg-blue-400 hover:bg-blue-900 text-black py-2 rounded w-full mr-2"
+            className="bg-custom-gray-light hover:bg-gray-500 text-black py-2 rounded w-full mr-2"
           >
             Summarize Conversations
           </button>
           <button
             type="submit"
             onClick={handleUploadClick}
-            className="bg-blue-400 hover:bg-blue-900 text-black py-2 rounded w-full mr-2"
+            className="bg-custom-gray-light hover:bg-gray-500 text-black py-2 rounded w-full mr-2"
           >
             Upload Audio comms
           </button></>)
