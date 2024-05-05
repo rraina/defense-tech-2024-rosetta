@@ -11,9 +11,15 @@ from datetime import datetime, timezone
 
 # CONSTANTS
 NUM_CHANNELS = 3
+TRIGGERWORDS = ["49ERS", "CHARGERS", "DOLPHINS", "GATOR", "ROGER"]
+
+# DB
+ALERT_MAP = {1: False, 2: False, 3: False}
 
 ### PROMPTS
 PROMPT_EXAMPLE = """As an example, if one message is "Mesa 41, this is Metal. We have a direct hit" followed by "This is Mesa 41, sounds good.", a summary could be "Metal has a direct hit which Mesa 41 acknowledged". In this message, Mesa 41 and Metal were the operators involved in this conversation"""
+
+MULTICHANNEL_SUMMARIZATION = """The following conversation will consist of transmissions across multiple channels. Summarize by grouping information into five key buckets: Enemy Situation, Friendly Situation, Key Events, Asset & Personnel Losses, and Supply/Logistics Sitation."""
 
 def OPERATOR_ADDENDUM(operator: str):
     return "When developing your summary, only incorporate information from transmissions from the following operator: " + operator + "."
@@ -43,7 +49,7 @@ def read_root():
 def summarize_channel(channel_id: int, is_testing: bool = False):
     # Return hard coded data if testing
     if is_testing:
-        return {"summary": "Gator 6 communicated with Viper to request a Hellfire attack on a building they're taking fire from. Viper confirmed this was possible and requested clarification if the attack was needed immediately, saying they could have a Hellfire on the building in about a minute. White 4 responded affirmatively to Viper’s request, but suggested directing the attack more towards the top of the building, where the fire is coming from. A moment would be needed to move their personnel back about 50 meters."}
+        return { "summary" : "Gator 6 communicated with Viper to request a Hellfire attack on a building they're taking fire from. Viper confirmed this was possible and requested clarification if the attack was needed immediately, saying they could have a Hellfire on the building in about a minute. White 4 responded affirmatively to Viper’s request, but suggested directing the attack more towards the top of the building, where the fire is coming from. A moment would be needed to move their personnel back about 50 meters." }
 
 
     # Retrieve all of the messages for the given channel id
@@ -59,7 +65,7 @@ def summarize_channel(channel_id: int, is_testing: bool = False):
 def summarize_channels(is_testing: bool = False):
     # Return hard coded data if testing
     if is_testing:
-        return {"summary": "Gator 6 communicated with Viper to request a Hellfire attack on a building they're taking fire from. Viper confirmed this was possible and requested clarification if the attack was needed immediately, saying they could have a Hellfire on the building in about a minute. White 4 responded affirmatively to Viper’s request, but suggested directing the attack more towards the top of the building, where the fire is coming from. A moment would be needed to move their personnel back about 50 meters."}
+        return {"summary": "This is a channel summary"}
 
     # Hardcode number of channels, and retrieve all of the relevant data
     sorted_messages = []
@@ -68,7 +74,7 @@ def summarize_channels(is_testing: bool = False):
         sorted_messages += dict(sorted(transcriptions.items())).values()
 
     # Pass them to ChatGPT to get a summary
-    summary = summarize_text(sorted_messages)
+    summary = summarize_text(sorted_messages, prompt_addendums=MULTICHANNEL_SUMMARIZATION)
     
     return {"summary": summary}
 
@@ -98,7 +104,7 @@ def channels_query(query: str = None, is_testing: bool = False):
         raise HTTPException(status_code=422, detail="Please specify an operator")
     # Return hard coded data if testing
     if is_testing:
-        return {"summary": "Gator 6 communicated with Viper to request a Hellfire attack on a building they're taking fire from. Viper confirmed this was possible and requested clarification if the attack was needed immediately, saying they could have a Hellfire on the building in about a minute. White 4 responded affirmatively to Viper’s request, but suggested directing the attack more towards the top of the building, where the fire is coming from. A moment would be needed to move their personnel back about 50 meters."}
+        return {"summary": "There have been 10 losses."}
 
     # Hardcode number of channels, and retrieve all of the relevant data
     sorted_messages = []
@@ -143,7 +149,7 @@ async def upload_audio(channel_id: int, files: List[UploadFile] = File(...), is_
     if is_testing:
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
         file_hash = hashlib.md5("123".encode()).hexdigest()
-        return {"audio_file_key": f"{UPLOAD_DIR}/{channel_id}/{timestamp}/{file_hash}/audio/123.mp4", "transcription_file_key": f"{UPLOAD_DIR}/{channel_id}/{timestamp}/{file_hash}/audio/123.mp4"}
+        return {"audio_file_key": f"{UPLOAD_DIR}/{channel_id}/{timestamp}/{file_hash}/audio/123.mp4", "transcription_file_key": f"{UPLOAD_DIR}/{channel_id}/{timestamp}/{file_hash}/audio/123.mp4", "alert": False}
     
     uploaded_files = []
     for file in files:
@@ -184,8 +190,15 @@ async def upload_audio(channel_id: int, files: List[UploadFile] = File(...), is_
         if transcription is not None:
             with open(transcription_file_location, "w") as f:
                 f.write(transcription)
+        
+        alert = False
+        for word in TRIGGERWORDS:
+            if word in transcription.upper():
+                alert = True
+                ALERT_MAP[channel_id] = True
+                break
 
-    return {"audio_file_key": audio_file_location, "transcription_file_key": transcription_file_location}
+    return {"audio_file_key": audio_file_location, "transcription_file_key": transcription_file_location, "alert": alert}
 
 @app.get("/channel/{channel_id}/transcriptions")
 def get_transcriptions_for_channel(channel_id: int):
@@ -211,6 +224,10 @@ def get_transcriptions_for_all_channels():
         all_transcriptions[channel_id] = channel_transcriptions
     
     return all_transcriptions
+
+@app.get("/channel/alerts")
+def get_channel_alert_status():
+    return ALERT_MAP
 
 def transcribe_audio(file_path: str) -> Union[str, None]:
     """
