@@ -105,7 +105,7 @@ async def upload_audio(channel_id: int, files: List[UploadFile] = File(...)):
     return {"audio_file_key": audio_file_location, "transcription_file_key": transcription_file_location}
 
 @app.get("/channel/{channel_id}/transcriptions")
-async def get_transcriptions_for_channel(channel_id: int):
+def get_transcriptions_for_channel(channel_id: int):
     # Get all the files in the channel directory
     channel_dir = f"{UPLOAD_DIR}/{channel_id}"
     if not os.path.exists(channel_dir):
