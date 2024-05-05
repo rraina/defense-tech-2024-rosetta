@@ -4,6 +4,7 @@ from fastapi import FastAPI, File, UploadFile, HTTPException
 from typing import Union, List
 import shutil
 import os
+import glob
 import hashlib
 from datetime import datetime, timezone
 
@@ -57,8 +58,8 @@ def summarize_text(messages, model="gpt-4", max_tokens=150):
     return response.choices[0].message.content
 
 
-@app.post("/channel/{id}")
-async def upload_audio(id: int, files: List[UploadFile] = File(...)):
+@app.post("/channel/{channel_id}")
+async def upload_audio(channel_id: int, files: List[UploadFile] = File(...)):
     uploaded_files = []
     for file in files:
         valid_file_extenstions = ['mp3', 'mp4', 'mpeg', 'mpga', 'm4a', 'wav', 'webm']
@@ -76,7 +77,7 @@ async def upload_audio(id: int, files: List[UploadFile] = File(...)):
         audio_file_extension = os.path.splitext(file.filename)[1]
         audio_filename = f"{file_hash}{audio_file_extension}"
 
-        audio_file_dir = f"{UPLOAD_DIR}/{id}/{timestamp}/{file_hash}/audio"
+        audio_file_dir = f"{UPLOAD_DIR}/{channel_id}/{timestamp}/{file_hash}/audio"
         # Create the directory if it doesn't exist
         os.makedirs(audio_file_dir, exist_ok=True)
 
@@ -88,7 +89,7 @@ async def upload_audio(id: int, files: List[UploadFile] = File(...)):
         audio_filename = f"{file_hash}.txt"
 
         # Create the transcription file path
-        transcription_dir = f"{UPLOAD_DIR}/{id}/{timestamp}/{file_hash}/transcription"
+        transcription_dir = f"{UPLOAD_DIR}/{channel_id}/{timestamp}/{file_hash}/transcription"
         os.makedirs(transcription_dir, exist_ok=True)
 
         transcription_file_location = f"{transcription_dir}/{audio_filename}"
@@ -101,6 +102,21 @@ async def upload_audio(id: int, files: List[UploadFile] = File(...)):
 
     return {"audio_file_key": audio_file_location, "transcription_file_key": transcription_file_location}
 
+@app.get("/channel/{channel_id}/transcriptions")
+async def get_transcriptions_for_channel(channel_id: int):
+    # Get all the files in the channel directory
+    channel_dir = f"{UPLOAD_DIR}/{channel_id}"
+    if not os.path.exists(channel_dir):
+        return []
+
+    text_files =  glob.glob(f'{channel_dir}/**/*.txt', recursive=True)
+
+    channel_transcriptions = {}
+    for file in text_files:
+        with open(file, "r") as f:
+            channel_transcriptions[file] = f.read()
+
+    return channel_transcriptions
 
 
 def transcribe_audio(file_path: str) -> Union[str, None]:
