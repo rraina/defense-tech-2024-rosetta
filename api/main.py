@@ -63,9 +63,9 @@ def summarize_channels(is_testing: bool = False):
 
     # Hardcode number of channels, and retrieve all of the relevant data
     sorted_messages = []
-    for channel_id in range(1, NUM_CHANNELS + 1):
-        messages = get_transcriptions_for_channel(channel_id)
-        sorted_messages += dict(sorted(messages.items())).values()
+    transcriptions_per_channel = get_transcriptions_for_all_channels()
+    for _, transcriptions in transcriptions_per_channel.items():
+        sorted_messages += dict(sorted(transcriptions.items())).values()
 
     # Pass them to ChatGPT to get a summary
     summary = summarize_text(sorted_messages)
@@ -83,7 +83,7 @@ def summarize_operator(operator_id: str = None, is_testing: bool = False):
     # Hardcode number of channels, and retrieve all of the relevant data
     sorted_messages = []
     transcriptions_per_channel = get_transcriptions_for_all_channels()
-    for _, transcriptions in enumerate(transcriptions_per_channel):
+    for _, transcriptions in transcriptions_per_channel.items():
         messages = dict(sorted(transcriptions.items())).values()
         sorted_messages += messages
 
@@ -103,12 +103,14 @@ def channels_query(query: str = None, is_testing: bool = False):
     # Hardcode number of channels, and retrieve all of the relevant data
     sorted_messages = []
     transcriptions_per_channel = get_transcriptions_for_all_channels()
-    for _, transcriptions in enumerate(transcriptions_per_channel):
+    for _, transcriptions in transcriptions_per_channel.items():
         messages = dict(sorted(transcriptions.items())).values()
         sorted_messages += messages
 
+    prompt_addendum = "When developing your summary, try to answer the following query in ```. Be concise. ```" + query + "```."
+
     # Pass them to ChatGPT to get a summary
-    summary = summarize_text(sorted_messages, prompt_addendums=query)
+    summary = summarize_text(sorted_messages, prompt_addendums=prompt_addendum)
     
     return {"summary": summary}
 
