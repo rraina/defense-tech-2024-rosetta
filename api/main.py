@@ -1,6 +1,7 @@
 from typing import Union
 from openai import OpenAI
 from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from typing import Union, List
 import shutil
 import os
@@ -9,6 +10,15 @@ import hashlib
 from datetime import datetime, timezone
 
 app = FastAPI()
+# Allow all CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
+
 openai_client = OpenAI()
 
 # Directory to save uploaded files
@@ -51,13 +61,16 @@ def summarize_text(messages, model="gpt-4", max_tokens=150):
         messages_processed.append({"role": "user", "content": m})
 
     print(messages_processed)
+    try:
+        response = openai_client.chat.completions.create(
+            model=model,
+            messages=messages_processed
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
 
-    response = openai_client.chat.completions.create(
-        model=model,
-        messages=messages_processed
-    )
-
-    return response.choices[0].message.content
 
 
 @app.post("/channel/{channel_id}")
@@ -130,7 +143,7 @@ def transcribe_audio(file_path: str) -> Union[str, None]:
     """
     try:
         with open(file_path, "rb") as audio_file:
-            transcription = openai_client.audio.transcriptions.create(model="whisper-1", file=audio_file, response_format="text")
+            transcription = openai_client.audio.transcriptions.create(model="whisper-1", file=audio_file, response_format="text", prompt="Hellfire")
         return transcription
     except Exception as e:
         print(f"An error occurred: {e}")
