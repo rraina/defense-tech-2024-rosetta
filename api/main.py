@@ -92,6 +92,26 @@ def summarize_operator(operator_id: str = None, is_testing: bool = False):
     
     return {"summary": summary}
 
+@app.get("/channels/query")
+def channels_query(query: str = None, is_testing: bool = False):
+    if query is None:
+        raise HTTPException(status_code=422, detail="Please specify an operator")
+    # Return hard coded data if testing
+    if is_testing:
+        return {"summary": "Gator 6 communicated with Viper to request a Hellfire attack on a building they're taking fire from. Viper confirmed this was possible and requested clarification if the attack was needed immediately, saying they could have a Hellfire on the building in about a minute. White 4 responded affirmatively to Viper’s request, but suggested directing the attack more towards the top of the building, where the fire is coming from. A moment would be needed to move their personnel back about 50 meters."}
+
+    # Hardcode number of channels, and retrieve all of the relevant data
+    sorted_messages = []
+    transcriptions_per_channel = get_transcriptions_for_all_channels()
+    for _, transcriptions in enumerate(transcriptions_per_channel):
+        messages = dict(sorted(transcriptions.items())).values()
+        sorted_messages += messages
+
+    # Pass them to ChatGPT to get a summary
+    summary = summarize_text(sorted_messages, prompt_addendums=query)
+    
+    return {"summary": summary}
+
 def summarize_text(messages, prompt_addendums=PROMPT_EXAMPLE, model="gpt-4", max_tokens=150):
     prompt = """
     Your job is to summarize the content of military radio transmissions. Summarize as if you are a third party observer of the conversation, not an active participant. 
