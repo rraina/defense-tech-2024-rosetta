@@ -190,7 +190,7 @@ def transcribe_audio(file_path: str) -> Union[str, None]:
     """
     try:
         with open(file_path, "rb") as audio_file:
-            transcription = openai_client.audio.transcriptions.create(model="whisper-1", file=audio_file, response_format="text", prompt="Hellfire")
+            transcription = openai_client.audio.transcriptions.create(model="whisper-1", file=audio_file, response_format="text", prompt="Hellfire, GFC, troops, tracer rounds,tally, Belt feds, MIG, RTB")
         return transcription
     except Exception as e:
         print(f"An error occurred: {e}")
