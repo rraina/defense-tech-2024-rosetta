@@ -48,43 +48,43 @@ export default function Home() {
         <h1 className="text-4xl font-bold mb-8 text-center text-white border-b-4 border-white pb-2">Channels</h1>
         {alertStatus1 ? (
           <div className={alertStyle}>
-            <button onClick={() => router.push("/conversation/OperationId1")}>Channel 1</button>
+            <button onClick={() => router.push("/conversation/1_TAD_OBJ_A")}>1. TAD (Obj A)</button>
             {/* <Link href="/conversation/OperationId1">Ben Brian OperationId1</Link> */}
           </div>
         ) : (
           <div className={normalStyle}>
-            <button onClick={() => router.push("/conversation/OperationId1")}>Channel 1</button>
+            <button onClick={() => router.push("/conversation/1_TAD_OBJ_A")}>1. TAD (Obj A)</button>
             {/* <Link href="/conversation/OperationId1">Ben Brian OperationId1</Link> */}
           </div>
         )}
 
         {alertStatus2 ? (
           <div className={alertStyle}>
-            <Link href="/conversation/OperationId2">Channel 2</Link>
+            <Link href="/conversation/2_TAD_OBJ_B">2: TAD (Obj B)</Link>
           </div>
         ) : (
           <div className={normalStyle}>
-            <Link href="/conversation/OperationId2">Channel 2</Link>
+            <Link href="/conversation/2_TAD_OBJ_B">2: TAD (Obj B)</Link>
           </div>
         )}
 
         {alertStatus3 ? (
           <div className={alertStyle}>
-            <Link href="/conversation/OperationId3">Channel 3</Link>
+            <Link href="/conversation/3_TAOC">3: TAOC</Link>
           </div>
         ) : (
           <div className={normalStyle}>
-            <Link href="/conversation/OperationId3">Channel 3</Link>
+            <Link href="/conversation/3_TAOC">3: TAOC</Link>
           </div>
         )}
 
         {alertStatus4 ? (
           <div className={alertStyle}>
-            <Link href="/conversation/OperationId4">Channel 4</Link>
+            <Link href="/conversation/4_JSDF_BN_TAC">4: JSDF BN TAC</Link>
           </div>
         ) : (
           <div className={normalStyle}>
-            <Link href="/conversation/OperationId4">Channel 4</Link>
+            <Link href="/conversation/4_JSDF_BN_TAC">4: JSDF BN TAC</Link>
           </div>
         )}
         <div className={summarizationStyle}>

@@ -20,7 +20,7 @@ async function uploadAudioFile(file, url) {
 
   try {
       // Send a POST request with the audio file
-      let response = await fetch(url+"channel/10?is_testing=true", {
+      let response = await fetch(url+"channel/10", {
           method: "POST",
           body: formData,
       });
@@ -51,7 +51,7 @@ export default function Chat({ title }) {
     let msgArr = [];
     
     const fetchData = async () => {
-      const response = await fetch(`https://2c3e0608831a.ngrok.app/channel/${title[title.length-1]}/transcriptions?is_testing=true`); // Your API endpoint
+      const response = await fetch(`https://2c3e0608831a.ngrok.app/channel/${title[0]}/transcriptions`); // Your API endpoint
       const jsonData = await response.json();
       
       Object.keys(jsonData).forEach(key => {
@@ -97,7 +97,7 @@ export default function Chat({ title }) {
       
       try {
         // Send a POST request with the audio file
-        let response = await fetch(`https://2c3e0608831a.ngrok.app/channels/query?query=${input}&is_testing=true`, {
+        let response = await fetch(`https://2c3e0608831a.ngrok.app/channels/query?query=${input}`, {
           method: "GET",
           headers: {
             'Content-Type': 'application/json',
@@ -133,7 +133,7 @@ export default function Chat({ title }) {
 
     try {
       // Send a POST request with the audio file
-      let response = await fetch("https://2c3e0608831a.ngrok.app/channels/summarize?is_testing=true", {
+      let response = await fetch("https://2c3e0608831a.ngrok.app/channels/summarize", {
           method: "GET",
           headers: {
             'Content-Type': 'application/json',
@@ -167,7 +167,7 @@ export default function Chat({ title }) {
     if (showOperator) {
       try {
         // Send a POST request with the audio file
-        let response = await fetch(`https://2c3e0608831a.ngrok.app/operator/summarize?operator_id=${input}&is_testing=true`, {
+        let response = await fetch(`https://2c3e0608831a.ngrok.app/operator/summarize?operator_id=${input}`, {
             method: "GET",
             headers: {
               'Content-Type': 'application/json',
@@ -202,7 +202,7 @@ export default function Chat({ title }) {
     
     try {
       // Send a POST request with the audio file
-      let response = await fetch("https://2c3e0608831a.ngrok.app/channel/1/summarize?is_testing=true", {
+      let response = await fetch("https://2c3e0608831a.ngrok.app/channel/1/summarize", {
           method: "GET",
           headers: {
             'Content-Type': 'application/json',
@@ -258,9 +258,9 @@ export default function Chat({ title }) {
       const formattedDate = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}`;
 
       if (result.alert) {
-        setMessages([...messages, {type:"alert", body: file.name+" is uploaded.", date: formattedDate}]);
+        setMessages([...messages, {type:"alert", body: file.name+" is uploaded.", date: getTime()}]);
       } else {
-        setMessages([...messages, {type:"upload", body: file.name+" is uploaded.", date: formattedDate}]);
+        setMessages([...messages, {type:"upload", body: file.name+" is uploaded.", date: getTime()}]);
       }
     })
     .catch(error => console.error("File upload failed:", error));
