@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 function readFileAsBase64(file) {
   return new Promise((resolve, reject) => {
@@ -44,6 +44,25 @@ export default function Chat({ title }) {
   const [showAsk, setShowAsk] = useState(false);  // State to control visibility
   const [showOperator, setShowOperator] = useState(false);  // State to control visibility
   
+  useEffect(() => {
+    let msgArr = [];
+    
+    const fetchData = async () => {
+      const response = await fetch(`https://2c3e0608831a.ngrok.app/channel/${title[title.length-1]}/transcriptions`); // Your API endpoint
+      const jsonData = await response.json();
+
+      Object.values(jsonData).forEach(value => {
+        msgArr.push({type:"summary", body: value});
+        console.log(value); // Outputs each value in the object
+      });
+      console.log(jsonData);
+
+      setMessages([...messages, ...msgArr]);
+    };
+
+    fetchData();
+  }, []); // The empty dependency array ensures the fetch is done only once after the component mounts.
+
   const sendMessage = (e) => {
     e.preventDefault(); // Prevent the form from refreshing the page
     // if (input.trim()) {
