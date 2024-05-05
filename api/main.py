@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 
 # CONSTANTS
 NUM_CHANNELS = 4
-TRIGGERWORDS = ["49ERS", "CHARGERS", "DOLPHINS"]
+TRIGGERWORDS = ["49ER", "49ERS", "CHARGER", "CHARGERS", "DOLPHIN", "DOLPHINS"]
 
 # DB
 ALERT_MAP = {1: False, 2: False, 3: False}
@@ -71,6 +71,7 @@ def summarize_channels(is_testing: bool = False):
     sorted_messages = []
     transcriptions_per_channel = get_transcriptions_for_all_channels()
     for _, transcriptions in transcriptions_per_channel.items():
+        print(transcriptions)
         sorted_messages += dict(sorted(transcriptions.items())).values()
 
     # Pass them to ChatGPT to get a summary
@@ -221,8 +222,8 @@ def get_transcriptions_for_all_channels():
     for channel_id in range(1, NUM_CHANNELS + 1):
         channel_transcriptions = get_transcriptions_for_channel(channel_id)
         all_transcriptions[channel_id] = channel_transcriptions
-    
     return all_transcriptions
+
 
 @app.get("/channel/alerts")
 def get_channel_alert_status():
