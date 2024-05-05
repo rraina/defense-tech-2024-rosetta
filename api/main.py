@@ -222,6 +222,11 @@ def get_transcriptions_for_all_channels():
     all_transcriptions = {}
     for channel_id in range(1, NUM_CHANNELS + 1):
         channel_transcriptions = get_transcriptions_for_channel(channel_id)
+
+        # Skip if there are no transcriptions for the channel
+        if not channel_transcriptions:
+            continue
+
         all_transcriptions[channel_id] = channel_transcriptions
     
     return all_transcriptions
