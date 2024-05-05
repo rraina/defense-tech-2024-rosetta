@@ -230,11 +230,11 @@ export default function Chat({ title }) {
   return (
     <div className="container mx-auto h-full w-full">
       <div className="h-full flex flex-col justify-between">
-        <div className="h-1/6 flex flex-col items-center justify-center text-white text-4xl">
+        <div className="h-1/6 flex flex-col items-center justify-center text-white text-4xl font-bold">
           <h1>{title}</h1>
           {
             title === "Summarize" ? (<></>) : (
-            <p className="items-center justify-center text-white text-sm">Ben-Brian</p>
+            <p className="items-center justify-center text-white text-sm">Ben, Brian</p>
             )
           }
         </div>

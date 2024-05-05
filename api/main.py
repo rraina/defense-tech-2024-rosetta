@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 
 # CONSTANTS
 NUM_CHANNELS = 3
-TRIGGERWORDS = ["49ERS", "CHARGERS", "DOLPHINS", "GATOR", "ROGER"]
+TRIGGERWORDS = ["49ERS", "CHARGERS", "DOLPHINS"]
 
 # DB
 ALERT_MAP = {1: False, 2: False, 3: False}
