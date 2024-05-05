@@ -22,11 +22,13 @@ def read_root():
 
 @app.get("/channel/{channel_id}/summarize")
 def summarize_channel(channel_id: int):
+
     # Retrieve all of the messages for the given channel id
-    messages = ['Metal 41 this is Mesa. Say position', 'Say status of line 5.', 'We are on deck at LZ Dodo']
+    messages = get_transcriptions_for_channel(channel_id)
+    sorted_messages = dict(sorted(messages.items())).values()
 
     # Pass them to ChatGPT to get a summary
-    summary = summarize_text(messages)
+    summary = summarize_text(sorted_messages)
 
     # Return the summary to the caller
     return {"summary": summary}
