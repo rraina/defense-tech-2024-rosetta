@@ -19,7 +19,7 @@ ALERT_MAP = {1: False, 2: False, 3: False}
 ### PROMPTS
 PROMPT_EXAMPLE = """As an example, if one message is "Mesa 41, this is Metal. We have a direct hit" followed by "This is Mesa 41, sounds good.", a summary could be "Metal has a direct hit which Mesa 41 acknowledged". In this message, Mesa 41 and Metal were the operators involved in this conversation"""
 
-MULTICHANNEL_SUMMARIZATION = """The following conversation will consist of transmissions across multiple channels. Summarize by grouping information into five key buckets: Enemy Situation, Friendly Situation, Key Events, Asset & Personnel Losses, and Supply/Logistics Sitation."""
+MULTICHANNEL_SUMMARIZATION = """The following conversation will consist of transmissions across multiple channels. Summarize by grouping information into five key buckets: Enemy Situation, Friendly Situation, Key Events, Asset & Personnel Losses, and Supply/Logistics Sitation. Add a couple new lines after each section for spacing purposes."""
 
 def OPERATOR_ADDENDUM(operator: str):
     return "When developing your summary, only incorporate information from transmissions from the following operator: " + operator + "."
@@ -201,7 +201,9 @@ async def upload_audio(channel_id: int, files: List[UploadFile] = File(...), is_
     return {"audio_file_key": audio_file_location, "transcription_file_key": transcription_file_location, "alert": alert}
 
 @app.get("/channel/{channel_id}/transcriptions")
-def get_transcriptions_for_channel(channel_id: int):
+def get_transcriptions_for_channel(channel_id: int, is_testing: bool = False):
+    if is_testing:
+        return {"1": "Message 1"}
     # Get all the files in the channel directory
     channel_dir = f"{UPLOAD_DIR}/{channel_id}"
     if not os.path.exists(channel_dir):
