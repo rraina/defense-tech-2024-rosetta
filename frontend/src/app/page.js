@@ -38,9 +38,9 @@ export default function Home() {
     fetchData();
   }, []); // The empty array ensures this effect runs only once after the initial render.
 
-  const alertStyle = "flex items-center font-bold justify-center text-2xl text-white bg-red-500 p-10";
-  const normalStyle = "flex items-center font-bold justify-center text-2xl text-white bg-custom-gray-dark p-10";
-  const summarizationStyle = "flex items-center font-bold justify-center text-2xl text-white bg-green-600 p-10";
+  const alertStyle = "flex rounded-2xl items-center font-bold justify-center text-2xl text-white bg-red-500 p-10 transition duration-300 ease-in-out transform hover:scale-105";
+  const normalStyle = "flex rounded-2xl items-center font-bold justify-center text-2xl text-white bg-custom-gray-dark p-10 transition duration-300 ease-in-out transform hover:scale-105";
+  const summarizationStyle = "flex rounded-2xl items-center font-bold justify-center text-2xl text-white bg-green-600 p-10 transition duration-300 ease-in-out transform hover:scale-105";
 
   return (
     <div className="container mx-auto box-border p-4 h-full w-full">

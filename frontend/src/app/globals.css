@@ -34,3 +34,26 @@ body {
     text-wrap: balance;
   }
 }
+
+/* Styles the entire scrollbar */
+::-webkit-scrollbar {
+  width: 12px;  /* width of the entire scrollbar */
+}
+
+/* Styles the track (part the thumb travels in) */
+::-webkit-scrollbar-track {
+  background: #f1f1f1; /* color of the track */
+  border-radius: 10px;
+}
+
+/* Styles the thumb itself */
+::-webkit-scrollbar-thumb {
+  background-color: darkgrey;    /* color of the thumb */
+  border-radius: 10px;
+}
+
+/* Styles the thumb when it's being hovered */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+
