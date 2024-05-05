@@ -41,6 +41,8 @@ export default function Chat({ title }) {
   const [input, setInput] = useState('');
   const fileInputRef = useRef(null); // Create a ref for the file input
   const [selectedFile, setSelectedFile] = useState(null);
+  const [showAsk, setShowAsk] = useState(false);  // State to control visibility
+  const [showOperator, setShowOperator] = useState(false);  // State to control visibility
 
   const sendMessage = (e) => {
     e.preventDefault(); // Prevent the form from refreshing the page
@@ -52,28 +54,33 @@ export default function Chat({ title }) {
   
   const handleAskClick = async (e) => {
     e.preventDefault(); // Prevent the form from refreshing the page
-    setMessages([...messages, {type:"upload", body: input}]);
-    try {
-      // Send a POST request with the audio file
-      let response = await fetch("https://496c-4-78-254-114.ngrok-free.app/channel/1/summarize?is_testing=true", {
-        method: "POST",
-        body: input,
-      });
-      
-      // Check if the request was successful
-      if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-      }
+    if (showAsk) {
+      setMessages([...messages, {type:"upload", body: input}]);
+      try {
+        // Send a POST request with the audio file
+        let response = await fetch("https://496c-4-78-254-114.ngrok-free.app/channel/1/summarize?is_testing=true", {
+          method: "POST",
+          body: input,
+        });
+        
+        // Check if the request was successful
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-      // Return the response JSON if successful
-      let result = await response.json();
-      console.log(result);
-     setMessages([...messages, {type:"summary", body: result.summary}]);
-
-      return result;
-    } catch (error) {
+        // Return the response JSON if successful
+        let result = await response.json();
+        console.log(result);
+        setMessages([...messages, {type:"summary", body: result.summary}]);
+        setShowAsk(false);
+        return result;
+      } catch (error) {
         console.error("Error summarizing.", error);
+        setShowAsk(false);
         throw error;
+      }
+    } else {
+      setShowAsk(true);
     }
   };
 
@@ -106,26 +113,31 @@ export default function Chat({ title }) {
   const handleSummaryOperClick = async (e) => {
     e.preventDefault(); // Prevent the form from refreshing the page
 
-    try {
-      // Send a POST request with the audio file
-      let response = await fetch("https://496c-4-78-254-114.ngrok-free.app/channel/1/summarize?is_testing=true", {
-          method: "GET"
-      });
-      
-      // Check if the request was successful
-      if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-      }
+    if (showOperator) {
+      try {
+        // Send a POST request with the audio file
+        let response = await fetch("https://496c-4-78-254-114.ngrok-free.app/channel/1/summarize?is_testing=true", {
+            method: "GET"
+        });
+        
+        // Check if the request was successful
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-      // Return the response JSON if successful
-      let result = await response.json();
-      console.log(result);
-     setMessages([...messages, {type:"summary", body: result.summary}]);
-
-      return result;
-    } catch (error) {
+        // Return the response JSON if successful
+        let result = await response.json();
+        console.log(result);
+        setMessages([...messages, {type:"summary", body: result.summary}]);
+        setShowOperator(false);
+        return result;
+      } catch (error) {
         console.error("Error summarizing.", error);
+        setShowOperator(false);
         throw error;
+      }
+    } else {
+      setShowOperator(true);
     }
   };
   
@@ -210,13 +222,14 @@ export default function Chat({ title }) {
           /> */}
           { title === "Summarize" ? (
             <>
+            {showAsk || showOperator ? (
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               className="flex-grow mr-4 p-2 bg-gray-500 rounded-md text-black"
               placeholder="Type your question..."
-            />
+            />) : null}
             <button
               type="submit"
               onClick={handleAskClick}
