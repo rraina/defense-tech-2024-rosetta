@@ -30,7 +30,7 @@ export default function Home() {
   useEffect(() => {
     async function fetchData() {
       try {
-        let response = await fetch(`https://2c3e0608831a.ngrok.app/channel/1/alert`, {
+        let response = await fetch(`https://2c3e0608831a.ngrok.app/channel/alerts`, {
           method: "GET",
           headers: {
             'Content-Type': 'application/json',
@@ -44,7 +44,10 @@ export default function Home() {
         let result = await response.json();
         console.log("result is ");
         console.log(result);
-        setAlertStatus(result.alert_status);
+        setAlertStatus(result[1]);
+        setAlertStatus2(result[2]);
+        setAlertStatus3(result[3]);
+        setAlertStatus4(result[3]);
       } catch (error) {
         console.error("Error during fetch:", error);
       }

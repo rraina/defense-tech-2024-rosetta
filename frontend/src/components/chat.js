@@ -60,7 +60,7 @@ export default function Chat({ title }) {
       
       try {
         // Send a POST request with the audio file
-        let response = await fetch(`https://2c3e0608831a.ngrok.app/channels/query?is_testing=true&query=${input}`, {
+        let response = await fetch(`https://2c3e0608831a.ngrok.app/channels/query?query=${input}`, {
           method: "GET",
           headers: {
             'Content-Type': 'application/json',
@@ -97,7 +97,7 @@ export default function Chat({ title }) {
 
     try {
       // Send a POST request with the audio file
-      let response = await fetch("https://2c3e0608831a.ngrok.app/channels/summarize?is_testing=true", {
+      let response = await fetch("https://2c3e0608831a.ngrok.app/channels/summarize", {
           method: "GET",
           headers: {
             'Content-Type': 'application/json',
@@ -131,7 +131,7 @@ export default function Chat({ title }) {
     if (showOperator) {
       try {
         // Send a POST request with the audio file
-        let response = await fetch(`https://2c3e0608831a.ngrok.app/operator/summarize?is_testing=true&operator_id=${input}`, {
+        let response = await fetch(`https://2c3e0608831a.ngrok.app/operator/summarize?operator_id=${input}`, {
             method: "GET",
             headers: {
               'Content-Type': 'application/json',
@@ -166,7 +166,7 @@ export default function Chat({ title }) {
     
     try {
       // Send a POST request with the audio file
-      let response = await fetch("https://2c3e0608831a.ngrok.app/channel/1/summarize?is_testing=true", {
+      let response = await fetch("https://2c3e0608831a.ngrok.app/channel/1/summarize", {
           method: "GET",
           headers: {
             'Content-Type': 'application/json',
