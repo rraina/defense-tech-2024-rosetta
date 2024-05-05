@@ -17,7 +17,7 @@ async function uploadAudioFile(file, url) {
 
   try {
       // Send a POST request with the audio file
-      let response = await fetch(url+"channel/10?is_testing=true", {
+      let response = await fetch(url+"channel/10", {
           method: "POST",
           body: formData,
       });
@@ -43,7 +43,7 @@ export default function Chat({ title }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [showAsk, setShowAsk] = useState(false);  // State to control visibility
   const [showOperator, setShowOperator] = useState(false);  // State to control visibility
-
+  
   const sendMessage = (e) => {
     e.preventDefault(); // Prevent the form from refreshing the page
     // if (input.trim()) {
@@ -54,13 +54,19 @@ export default function Chat({ title }) {
   
   const handleAskClick = async (e) => {
     e.preventDefault(); // Prevent the form from refreshing the page
+    let messageAsk = []
     if (showAsk) {
-      setMessages([...messages, {type:"upload", body: input}]);
+      messageAsk.push({type:"upload", body: input});
+      
       try {
         // Send a POST request with the audio file
-        let response = await fetch("https://496c-4-78-254-114.ngrok-free.app/channel/1/summarize?is_testing=true", {
-          method: "POST",
-          body: input,
+        let response = await fetch(`https://2c3e0608831a.ngrok.app/channels/query?is_testing=true&query=${input}`, {
+          method: "GET",
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'ngrok-skip-browser-warning': 'true',
+          }
         });
         
         // Check if the request was successful
@@ -71,7 +77,9 @@ export default function Chat({ title }) {
         // Return the response JSON if successful
         let result = await response.json();
         console.log(result);
-        setMessages([...messages, {type:"summary", body: result.summary}]);
+        messageAsk.push({type:"summary", body: result.summary});
+
+        setMessages([...messages, ...messageAsk]);
         setShowAsk(false);
         return result;
       } catch (error) {
@@ -89,8 +97,15 @@ export default function Chat({ title }) {
 
     try {
       // Send a POST request with the audio file
-      let response = await fetch("https://496c-4-78-254-114.ngrok-free.app/channel/1/summarize?is_testing=true", {
-          method: "GET"
+      let response = await fetch("https://2c3e0608831a.ngrok.app/channels/summarize?is_testing=true", {
+          method: "GET",
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            ...new Headers({
+               'ngrok-skip-browser-warning': true,
+            }),
+          }
       });
       
       // Check if the request was successful
@@ -116,8 +131,13 @@ export default function Chat({ title }) {
     if (showOperator) {
       try {
         // Send a POST request with the audio file
-        let response = await fetch("https://496c-4-78-254-114.ngrok-free.app/channel/1/summarize?is_testing=true", {
-            method: "GET"
+        let response = await fetch(`https://2c3e0608831a.ngrok.app/operator/summarize?is_testing=true&operator_id=${input}`, {
+            method: "GET",
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'ngrok-skip-browser-warning': 'true',
+            }
         });
         
         // Check if the request was successful
@@ -146,19 +166,28 @@ export default function Chat({ title }) {
     
     try {
       // Send a POST request with the audio file
-      let response = await fetch("https://496c-4-78-254-114.ngrok-free.app/channel/1/summarize?is_testing=true", {
-          method: "GET"
+      let response = await fetch("https://2c3e0608831a.ngrok.app/channel/1/summarize?is_testing=true", {
+          method: "GET",
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            ...new Headers({
+               'ngrok-skip-browser-warning': true,
+            }),
+          }
       });
-      
+      console.log(response);
       // Check if the request was successful
       if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       // Return the response JSON if successful
+      
       let result = await response.json();
+      
       console.log(result);
-     setMessages([...messages, {type:"summary", body: result.summary}]);
+      setMessages([...messages, {type:"summary", body: result.summary}]);
 
       return result;
     } catch (error) {
@@ -180,12 +209,18 @@ export default function Chat({ title }) {
       return;
     }
 
-    uploadAudioFile(file, "https://496c-4-78-254-114.ngrok-free.app/")
-    .then(result => console.log("File uploaded successfully:", result))
+    uploadAudioFile(file, "https://2c3e0608831a.ngrok.app/")
+    .then(result => {
+      console.log("File uploaded successfully:", result);
+      if (result.alert) {
+        setMessages([...messages, {type:"alert", body: file.name+" is uploaded."}]);
+      } else {
+        setMessages([...messages, {type:"upload", body: file.name+" is uploaded."}]);
+      }
+    })
     .catch(error => console.error("File upload failed:", error));
 
     console.log(file);
-    setMessages([...messages, {type:"upload", body: file.name+" is uploaded."}]);
   };
 
   const handleUploadClick = () => {
@@ -195,17 +230,25 @@ export default function Chat({ title }) {
   return (
     <div className="container mx-auto h-full w-full">
       <div className="h-full flex flex-col justify-between">
-        <div className="h-1/6 flex items-center justify-center text-white text-4xl">
+        <div className="h-1/6 flex flex-col items-center justify-center text-white text-4xl">
           <h1>{title}</h1>
+          {
+            title === "Summarize" ? (<></>) : (
+            <p className="items-center justify-center text-white text-sm">Ben-Brian</p>
+            )
+          }
         </div>
         <div className="overflow-y-auto h-4/6 p-4 bg-custom-gray rounded-md">
           {messages.map((message, index) => (
             message.type === "summary"? (
-              <div key={index} className="mb-2 p-4 bg-green-700 text-white rounded-md">
-                Important: {message.body}
+              <div key={index} className="w-3/4 ml-auto mb-2 p-4 bg-green-700 text-white rounded-md">
+                {message.body}
               </div>
-            ) : (
-              <div key={index} className="mb-2 p-4 bg-blue-400 text-black rounded-md">
+            ) : message.type === "alert"?  (
+                <div key={index} className="w-3/4 mb-2 p-4 bg-red-400 text-black rounded-md">
+                  {message.body}
+                </div>) : (
+              <div key={index} className="w-3/4 mb-2 p-4 bg-blue-400 text-black rounded-md">
                 {message.body}
               </div>
             )
