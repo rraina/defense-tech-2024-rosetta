@@ -10,7 +10,7 @@ import hashlib
 from datetime import datetime, timezone
 
 # CONSTANTS
-NUM_CHANNELS = 3
+NUM_CHANNELS = 4
 TRIGGERWORDS = ["49ERS", "CHARGERS", "DOLPHINS"]
 
 # DB
@@ -151,7 +151,6 @@ async def upload_audio(channel_id: int, files: List[UploadFile] = File(...), is_
         file_hash = hashlib.md5("123".encode()).hexdigest()
         return {"audio_file_key": f"{UPLOAD_DIR}/{channel_id}/{timestamp}/{file_hash}/audio/123.mp4", "transcription_file_key": f"{UPLOAD_DIR}/{channel_id}/{timestamp}/{file_hash}/audio/123.mp4", "alert": False}
     
-    uploaded_files = []
     for file in files:
         valid_file_extenstions = ['mp3', 'mp4', 'mpeg', 'mpga', 'm4a', 'wav', 'webm']
         valid_file_extensions_str = ', '.join(valid_file_extenstions)
@@ -238,7 +237,7 @@ def transcribe_audio(file_path: str) -> Union[str, None]:
     """
     try:
         with open(file_path, "rb") as audio_file:
-            transcription = openai_client.audio.transcriptions.create(model="whisper-1", file=audio_file, response_format="text", prompt="Hellfire, GFC, troops, tracer rounds,tally, Belt feds, MIG, RTB")
+            transcription = openai_client.audio.translations.create(model="whisper-1", file=audio_file, response_format="text", prompt="Hellfire, GFC, troops, tracer rounds,tally, Belt feds, MIG, RTB")
         return transcription
     except Exception as e:
         print(f"An error occurred: {e}")
