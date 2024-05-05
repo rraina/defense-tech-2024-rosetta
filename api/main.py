@@ -12,9 +12,8 @@ from datetime import datetime, timezone
 # CONSTANTS
 NUM_CHANNELS = 3
 
-
 ### PROMPTS
-PROMPT_EXAMPLE = """As an example, if one message is "Mesa 41, this is Metal. We have a direct hit" followed by "This is Mesa 41, sounds good.", a summary could be "Metal has a direct hit which Mesa 41 acknowledged"."""
+PROMPT_EXAMPLE = """As an example, if one message is "Mesa 41, this is Metal. We have a direct hit" followed by "This is Mesa 41, sounds good.", a summary could be "Metal has a direct hit which Mesa 41 acknowledged". In this message, Mesa 41 and Metal were the operators involved in this conversation"""
 
 def OPERATOR_ADDENDUM(operator: str):
     return "When developing your summary, only incorporate information from transmissions from the following operator: " + operator + "."
@@ -73,8 +72,10 @@ def summarize_channels(is_testing: bool = False):
     
     return {"summary": summary}
 
-@app.get("/operator/{operator_id}/summarize")
-def summarize_operator(operator_id: str, is_testing: bool = False):
+@app.get("/operator/summarize")
+def summarize_operator(operator_id: str = None, is_testing: bool = False):
+    if operator_id is None:
+        raise HTTPException(status_code=422, detail="Please specify an operator")
     # Return hard coded data if testing
     if is_testing:
         return {"summary": "Gator 6 communicated with Viper to request a Hellfire attack on a building they're taking fire from. Viper confirmed this was possible and requested clarification if the attack was needed immediately, saying they could have a Hellfire on the building in about a minute. White 4 responded affirmatively to Viper’s request, but suggested directing the attack more towards the top of the building, where the fire is coming from. A moment would be needed to move their personnel back about 50 meters."}
@@ -92,7 +93,7 @@ def summarize_operator(operator_id: str, is_testing: bool = False):
 
 def summarize_text(messages, prompt_addendums=PROMPT_EXAMPLE, model="gpt-4", max_tokens=150):
     prompt = """
-    Your job is to summarize the content of military radio transmissions. Summarize as if you are a third party observer of the conversation, not an acitve participant. 
+    Your job is to summarize the content of military radio transmissions. Summarize as if you are a third party observer of the conversation, not an active participant. 
     Most transmissions will adhere to the following format: who is being called, followed by the callsign of whomever is calling followed by the message.
     Do not assume anything that is not directly stated.
     """ + prompt_addendums
