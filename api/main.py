@@ -70,9 +70,10 @@ def summarize_channels(is_testing: bool = False):
     # Hardcode number of channels, and retrieve all of the relevant data
     sorted_messages = []
     transcriptions_per_channel = get_transcriptions_for_all_channels()
-    for _, transcriptions in transcriptions_per_channel.items():
-        print(transcriptions)
+    for channel_id, transcriptions in transcriptions_per_channel.items():
+        sorted_messages += ["===/// STARTING CONVERSATION FOR CHANNEL {channel_id}"]
         sorted_messages += dict(sorted(transcriptions.items())).values()
+        sorted_messages += ["ENDING CONVERSATION FOR CHANNEL {channel_id} ///==="]
 
     # Pass them to ChatGPT to get a summary
     summary = summarize_text(sorted_messages, prompt_addendums=MULTICHANNEL_SUMMARIZATION)
@@ -107,14 +108,16 @@ def channels_query(query: str = None, is_testing: bool = False):
     if is_testing:
         return {"summary": "There have been 10 losses."}
 
-    # Hardcode number of channels, and retrieve all of the relevant data
+    # Hardcode number of channels, and retrieve all of the relevant data #####
     sorted_messages = []
     transcriptions_per_channel = get_transcriptions_for_all_channels()
-    for _, transcriptions in transcriptions_per_channel.items():
+    for channel_id, transcriptions in transcriptions_per_channel.items():
         messages = dict(sorted(transcriptions.items())).values()
+        sorted_messages += ["===/// STARTING CONVERSATION FOR CHANNEL {channel_id}"]
         sorted_messages += messages
+        sorted_messages += ["ENDING CONVERSATION FOR CHANNEL {channel_id} ///==="]
 
-    prompt_addendum = "When developing your summary, try to answer the following query in ```. Be concise. ```" + query + "```."
+    prompt_addendum = "When developing your summary, try to answer the following query in ```. Be concise. Try to limit information to only the relevant channels. Do not infer any information that is not explicitly stated. ```" + query + "```."
 
     # Pass them to ChatGPT to get a summary
     summary = summarize_text(sorted_messages, prompt_addendums=prompt_addendum)
